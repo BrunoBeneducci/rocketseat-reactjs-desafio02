@@ -22,44 +22,55 @@ interface CartItemsAmount {
 }
 
 const Home = (): JSX.Element => {
-  // const [products, setProducts] = useState<ProductFormatted[]>([]);
-  // const { addProduct, cart } = useCart();
+  const [products, setProducts] = useState<ProductFormatted[]>([]);
+  const { addProduct, cart } = useCart();
 
-  // const cartItemsAmount = cart.reduce((sumAmount, product) => {
-  //   // TODO
-  // }, {} as CartItemsAmount)
+  console.log('home', cart);
+
+  const cartItemsAmount = cart.reduce((sumAmount, product) => {
+    const newSumAmount = {...sumAmount};
+    newSumAmount[product.id] = product.amount;
+    return newSumAmount;
+  }, {} as CartItemsAmount)
 
   useEffect(() => {
     async function loadProducts() {
-      // TODO
+      const getProducts = await api.get('/products')
+      setProducts(getProducts.data);
     }
-
+  
     loadProducts();
   }, []);
 
   function handleAddProduct(id: number) {
-    // TODO
+    addProduct(id);
   }
 
   return (
     <ProductList>
-      <li>
-        <img src="https://rocketseat-cdn.s3-sa-east-1.amazonaws.com/modulo-redux/tenis1.jpg" alt="Tênis de Caminhada Leve Confortável" />
-        <strong>Tênis de Caminhada Leve Confortável</strong>
-        <span>R$ 179,90</span>
-        <button
-          type="button"
-          data-testid="add-product-button"
-        // onClick={() => handleAddProduct(product.id)}
-        >
-          <div data-testid="cart-product-quantity">
-            <MdAddShoppingCart size={16} color="#FFF" />
-            {/* {cartItemsAmount[product.id] || 0} */} 2
-          </div>
+      {
+        products ? (
+          products.map(el => (
+            <li key={el.id}>
+              <img src={el.image} alt={el.title} />
+              <strong>{el.title}</strong>
+              <span>{formatPrice(el.price)}</span>
+              <button
+                type="button"
+                data-testid="add-product-button"
+                onClick={() => handleAddProduct(el.id)}
+              >
+                <div data-testid="cart-product-quantity">
+                  <MdAddShoppingCart size={16} color="#FFF" />
+                  {cartItemsAmount[el.id] || 0}
+                </div>
 
-          <span>ADICIONAR AO CARRINHO</span>
-        </button>
-      </li>
+                <span>ADICIONAR AO CARRINHO</span>
+              </button>
+            </li>
+          ))
+        ) : ''
+      }
     </ProductList>
   );
 };
